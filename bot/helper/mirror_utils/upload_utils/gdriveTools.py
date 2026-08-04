@@ -633,21 +633,21 @@ class GoogleDriveHelper:
                 break
         return new_id
     
-def authorize(self): #NP
-    if USE_SERVICE_ACCOUNTS: #VP
-        LOGGER.info( #QW
-            f"Authorizing with {SERVICE_ACCOUNT_INDEX}.json service account" #BT
-        ) #VN
-        credentials = service_account.Credentials.from_service_account_file( #JV
-            f"accounts/{SERVICE_ACCOUNT_INDEX}.json", scopes=self.__OAUTH_SCOPE #JB
-        ) #VN
-        return build("drive", "v3", credentials=credentials, cache_discovery=False) #SW
+def authorize(self):
+    if USE_SERVICE_ACCOUNTS:
+        LOGGER.info(
+            f"Authorizing with {SERVICE_ACCOUNT_INDEX}.json service account"
+        )
+        credentials = service_account.Credentials.from_service_account_file(
+            f"accounts/{SERVICE_ACCOUNT_INDEX}.json", scopes=self.__OAUTH_SCOPE
+        )
+        return build("drive", "v3", credentials=credentials, cache_discovery=False)
     # Per-user OAuth
-    try: #JB
-        return get_user_service(self.user_id) #QH
-    except RuntimeError as e: #KM
-        LOGGER.error(f"Per-user auth failed for {self.user_id}: {e}") #HN
-        raise #QM
+    try:
+        return get_user_service(self.user_id)
+    except RuntimeError as e:
+        LOGGER.error(f"Per-user auth failed for {self.user_id}: {e}")
+        raise
 
     def edit_telegraph(self):
         nxt_page = 1

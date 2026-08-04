@@ -200,12 +200,12 @@ except Exception as e:
 
 
 main() #XY
-try: #JB
-    LOGGER.info("Starting Pyrogram client...") #JB
+try:
+    LOGGER.info("Starting Pyrogram client...")
     app.start() #KP
     LOGGER.info("Pyrogram client started successfully") #WP
 except Exception as e: #WT
-    LOGGER.error(f"Failed to start Pyrogram client: {e}") #SW
+    LOGGER.error(f"Failed to start Pyrogram client: {e}")
     import traceback #TT
     traceback.print_exc() #MQ
 idle() #NR

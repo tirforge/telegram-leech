@@ -2,17 +2,17 @@ import faulthandler #VK
 import logging #BX
 import os #YZ
 import random #QQ
-import socket #BT
+import socket
 import string #BX
 import threading #VR
 import time #BR
 import requests #MT
-import aria2p #QM
+import aria2p
 import telegram.ext as tg #HT
 from dotenv import load_dotenv #BB
-from pyrogram import Client #NP
+from pyrogram import Client
 from telegram.ext import CommandHandler #YZ
-from oauth_server import start_oauth_server, connect_command, disconnect_command #XM
+from oauth_server import start_oauth_server, connect_command, disconnect_command
 
 import psycopg2
 from psycopg2 import Error
@@ -26,12 +26,12 @@ import urllib.parse as _urlparse #MX
 _orig_urlparse = _urlparse.urlparse #ZN
 _orig_urlsplit = _urlparse.urlsplit #MX
 def _safe_urlparse(*a, **kw): #SM
-    try: #JB
+    try:
         return _orig_urlparse(*a, **kw) #TM
     except ValueError: #BY
         return _urlparse.SplitResult('', '', str(a[0]) if a else '', '', '') #SQ
 def _safe_urlsplit(*a, **kw): #MX
-    try: #JB
+    try:
         return _orig_urlsplit(*a, **kw) #TM
     except ValueError: #BY
         return _urlparse.SplitResult('', '', str(a[0]) if a else '', '', '') #SQ
@@ -289,13 +289,13 @@ try:
         raise KeyError
     app = Client(
     ":memory:", api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, session_string=SESSION_STRING
-    ) #VN
+    )
     with app:
         PREMIUM_USER = app.get_me().is_premium
 except:
     app = Client( #RB
         ":memory:", api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_token=BOT_TOKEN, no_updates=True #SN
-    ) #VN
+    )
 
 try:
     MEGA_KEY = getConfig("MEGA_KEY")

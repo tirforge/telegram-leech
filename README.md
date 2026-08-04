@@ -1,307 +1,85 @@
-# MirrorBot137
+# Telegram Leech / Mirror Bot
 
-**Important** - Read these points first
-- Original repo is https://github.com/lzzy12/python-aria-mirror-bot
-- I have collected some cool features from various repositories and merged them in one.
-- So, credits goes to original repo holder, not to me. I have just collected them.
-- This (or any custom) repo is not supported in official bot support group.
+A Python Telegram bot for mirroring files from the internet (direct links, torrents, Mega, YouTube/yt-dlp, Telegram files) to **Google Drive** or **Telegram** — with **per-user Google Drive support via OAuth**.
 
-### What is this repo about?
-This is a telegram bot writen in python for mirroring files on the internet to our beloved Google Drive.
+This is a fork of [MirrorBot137](https://github.com/rahulkhatri137/mirrorbot137), which is itself a feature-collection fork of [lzzy12/python-aria-mirror-bot](https://github.com/lzzy12/python-aria-mirror-bot). Full credits to the original authors at the bottom — all upstream features are preserved and extended.
 
-## Inspiration
-This project is heavily inspired from @out386 's telegram bot which is written in JS .
+> **Important**: This (or any custom) repo is not supported in the official bot support group. Use at your own risk.
 
-<details>
-<summary>Features supported:</summary>
+## What's new in this fork
 
+- **Per-user Google Drive support (OAuth)** — every authorized user can connect their *own* Google Drive with `/connect` and upload there, instead of everyone sharing the bot owner's folder. Credentials are stored per user (`user_creds/<user_id>.json`), auto-refreshed, and never shared.
+- **Cloudflare Tunnel support** — expose the OAuth callback server publicly without a static IP / port-forwarding (see [Exposing the OAuth server with Cloudflare Tunnel](#exposing-the-oauth-server-with-cloudflare-tunnel)).
+- **HiddenCloud / restricted-host compatibility fixes** — auto-install of requirements at startup, PYTHONPATH setup for `.local` site-packages, `imghdr` shim for Python 3.12/3.13, `urllib3<2` + `setuptools<71` pins, `psycopg2-binary` (no `pg_config` needed), and Telegraph API failure handling.
+- **Pyrogram ↔ PTB conflict fixes** — `bot_token`/`SESSION_STRING` coexistence and `TG_SPLIT_SIZE` type-comparison fixes.
 
-- Mirroring direct download links to google drive/Telegram
-- Mirroring Mega.nz links to google drive/Telegram
-- Mirror Telegram files to google drive
-- Mirror all youtube-dl supported links
-- Mirror Torrent Files and magnet links
-- Mirror By Reply
-- Mirror/Leech multiple Links or Files
-- Custom filename support in direct link, telegram files, YT-DL links
-- Extract these filetypes and uploads to google drive
-  > ZIP, RAR, TAR, 7z, ISO, WIM, CAB, GZIP, BZIP2, APM, ARJ, CHM, CPIO, CramFS,
-  > DEB, DMG, FAT, HFS, LZH, LZMA, LZMA2, MBR, MSI, MSLZ, NSIS, NTFS, RPM,
-  > SquashFS, UDF, VHD, XAR, Z.
-- Copy files from someone's drive to your drive (using Autorclone)
-- Service account support in cloning and uploading
-- Download/upload progress,speeds and ETAs
+## Features
+
+- Mirror direct download links to Google Drive / Telegram
+- Mirror Mega.nz links to Google Drive / Telegram
+- Mirror Telegram files to Google Drive
+- Mirror all yt-dlp supported links (YouTube, etc.)
+- Mirror torrent files and magnet links (aria2)
+- Mirror by reply; mirror/leech multiple links or files
+- Custom filename support (direct links, Telegram files, yt-dlp links)
+- Extract and upload archives: ZIP, RAR, TAR, 7z, ISO, WIM, CAB, GZIP, BZIP2, APM, ARJ, CHM, CPIO, CramFS, DEB, DMG, FAT, HFS, LZH, LZMA, LZMA2, MBR, MSI, MSLZ, NSIS, NTFS, RPM, SquashFS, UDF, VHD, XAR, Z
+- Copy files from someone's Drive to your Drive (Autorclone)
+- Service account support for cloning and uploading
+- Download/upload progress, speeds and ETAs
 - Docker support
-- Uploading To Team Drives.
-- Index Link support
-- Shortener support
-- View Index Links To Steam Videos Or Music Online (Works With Bhadoo)
-- Leech Files To Telegram with custom Thumbnail & Names.
-- Multi Drive Search. 
-- SpeedTest.
-- Count Drive Files.
-- Extract password protected files (It's not hack, you have to enter password)
-- For extracting password protected files, using custom filename and download
-- Update bot at startup and with restart command using `UPSTREAM_REPO`
-- Log Chat for mirror messages
-- Telegram Premium 4GB upload
-- Custom Name for all links except torrents. Must add extension except stream/yt links.
-- Send files directly to PM
+- Upload to Team Drives
+- Index link support, URL shortener support, index-link streaming (Bhadoo)
+- Leech to Telegram with custom thumbnail and names
+- Multi-drive search, speedtest, count drive files
+- Extract password-protected archives (you supply the password)
+- Self-update on startup and `/restart` via `UPSTREAM_REPO`
+- Mirror log chat; Telegram Premium 4GB uploads; send files directly to PM
+- **Per-user Google Drive uploads via OAuth (`/connect`)**
 
-## Multi Search IDs
-To use list from multi TD/folder. Run driveid.py in your terminal and follow it. It will generate **drive_folder** file or u can simply create `drive_folder` file in working directory and fill it, check below format:
-```
-MyTdName tdID IndexLink(if available)
-MyTdName2 tdID IndexLink(if available)
-```
-Turn On RECURSIVE_SEARCH In Config -RECURSIVE_SEARCH = "True"
+## How to use
 
-</details>
+### 1. Deploy
 
-<details>
-<summary>How to deploy?</summary>
+The bot runs as a Python process (Docker recommended). See [Deployment](#deployment) for Docker, Heroku, and GitHub Actions options.
 
+### 2. Configure
 
-Deploying is pretty much straight forward and is divided into several steps as follows:
-## Installing requirements
+Copy the sample config and fill it in:
 
-- Clone this repo:
-```
-git clone -b master https://github.com/rahulkhatri137/mirrorbot137
-cd mirrorbot137
-```
-
-- Install requirements
-For Debian based distros
-```
-sudo apt install python3
-```
-Install Docker by following the [official docker docs](https://docs.docker.com/engine/install/debian/)
-
-
-- For Arch and it's derivatives:
-```
-sudo pacman -S docker python
-```
-
-- Install dependencies for running setup scripts:
-```
-pip3 install -r requirements-cli.txt
-```
-
-## Deploying
-
-- Start docker daemon (skip if already running):
-````
-sudo dockerd
-````
-
-- Build Docker image:
-```
-sudo docker build . -t mirror-bot
-````
-
-- Run the image:
-
-```
-sudo docker run mirror-bot
-```
-
-</details>
-
-
-<details>   
-<summary>Setting up config file</summary>
-
-```
+```bash
 cp config_sample.env config.env
 ```
 
-- Remove the first line saying:
+Remove the `_____REMOVE_THIS_LINE_____=True` line, then fill at minimum:
 
-```
-_____REMOVE_THIS_LINE_____=True
-```
+| Var | Purpose |
+|---|---|
+| `BOT_TOKEN` | Token from [@BotFather](https://t.me/BotFather) |
+| `TELEGRAM_API`, `TELEGRAM_HASH` | From https://my.telegram.org (for Telegram file transfers) |
+| `OWNER_ID` | Your Telegram user ID |
+| `GDRIVE_FOLDER_ID` | Default Drive folder/team drive ID for uploads |
+| `DOWNLOAD_DIR` | Local download path |
 
-Fill up rest of the fields. Meaning of each field is discussed below:
+See the full [Configuration reference](#configuration-reference) below.
 
-**1. Required Fields**
+### 3. Start the bot
 
-- `BOT_TOKEN`: The Telegram Bot Token that you got from [@BotFather](https://t.me/BotFather)
-- `TELEGRAM_API`: This is to authenticate your Telegram account for downloading Telegram files. You can get this from https://my.telegram.org. `Int`
-- `TELEGRAM_HASH`: This is to authenticate your Telegram account for downloading Telegram files. You can get this from https://my.telegram.org.
-- `OWNER_ID`: The Telegram User ID (not username) of the Owner of the bot. `Int`
-- `GDRIVE_FOLDER_ID`: This is the Folder/TeamDrive ID of the Google Drive Folder to which you want to upload all the mirrors.
-- `DOWNLOAD_DIR`: The path to the local folder where the downloads should be downloaded to.
-- `DOWNLOAD_STATUS_UPDATE_INTERVAL`: Time in seconds after which the progress/status message will be updated. Recommended `10` seconds at least. `Int`
-- `AUTO_DELETE_MESSAGE_DURATION`: Interval of time (in seconds), after which the bot deletes it's message and command message which is expected to be viewed instantly. **NOTE**: Set to `-1` to disable auto message deletion. `Int`
-
-**2. Optional Fields**
-
-- `UPSTREAM_REPO`: Your github repository link, if your repo is private add `https://username:{githubtoken}@github.com/{username}/{reponame}` format. Get token from [Github settings](https://github.com/settings/tokens). So you can update your bot from filled repository on each restart.
-  - **NOTE**: Any change in docker or requirements you need to deploy/build again with updated repo to take effect. DON'T delete .gitignore file.
-- `UPSTREAM_BRANCH`: Upstream branch for update. Default is `master`.
-- `ACCOUNTS_ZIP_URL`: Only if you want to load your Service Account externally from an Index Link or by any direct download link NOT webpage link. Archive the accounts folder to ZIP file. Fill this with the direct download link of zip file. If index need authentication so add direct download as shown below:
-  - `https://username:password@example.workers.dev/...`
-- `TOKEN_PICKLE_URL`: Only if you want to load your **token.pickle** externally from an Index Link. Fill this with the direct link of that file.
-- `DATABASE_URL`: Your SQL Database URL. Follow the Generate Database Guide below. Data will be saved in Database: auth and sudo users, leech settings including thumbnails for each user, rss data and incomplete tasks. **NOTE**: If deploying on heroku and using heroku postgresql delete this variable from **config.env** file. **DATABASE_URL** will be grabbed from heroku variables.
-- `AUTHORIZED_CHATS`: Fill user_id and chat_id of groups/users you want to authorize. Separate them by space.
-- `SUDO_USERS`: Fill user_id of users whom you want to give sudo permission. Separate them by space.
-- `IS_TEAM_DRIVE`: Set `True` if uploading to TeamDrive. Default is `False`. `Bool`
-- `USE_SERVICE_ACCOUNTS`: Whether to use Service Accounts or not. For this to work see Using Service Accounts section below. Default is `False`. `Bool`
-- `INDEX_URL`: Refer to [Bhadoo Index](https://github.com/rahulkhatri137/Google-Drive-Index) [GoIndex](https://github.com/rahulkhatri137/goindex) [GD Index](https://github.com/rahulkhatri137/GDIndex).
-- `MEGA_KEY`: Mega.nz API key to mirror mega.nz links. Get it from [Mega SDK Page](https://mega.nz/sdk)
-- `MEGA_USERNAME`: E-Mail ID used to sign up on mega.nz for using premium account.
-- `MEGA_PASSWORD`: Password for mega.nz account.
-- `UPTOBOX_TOKEN`: Uptobox token to mirror uptobox links. Get it from [Uptobox Premium Account](https://uptobox.com/my_account).
-- `STOP_DUPLICATE_CLONE`: Bot will check file in Drive, if it is present in Drive, downloading or cloning will be stopped. (**NOTE**: File will be checked using filename not file hash, so this feature is not perfect yet). Default is `False`. `Bool`
-- `CLONE_LIMIT`: To limit the size of Google Drive folder/file which you can clone. Don't add unit. Default unit is `GB`.
-- `VIEW_LINK`: View Link button to open file Index Link in browser instead of direct download link, you can figure out if it's compatible with your Index code or not, open any video from you Index and check if its URL ends with `?a=view`, if yes make it `True`, compatible with [BhadooIndex](https://gitlab.com/ParveenBhadooOfficial/Google-Drive-Index) Code. Default is `False`. `Bool`
-- `IGNORE_PENDING_REQUESTS`: Ignore pending requests after restart. Default is `False`. `Bool`
-- `SESSION_STRING`: To download/upload from your telegram account. To generate session string use this command `python3 generate_string_session.py` after mounting repo folder for sure.
- - **NOTE**: You can't use bot with private message, use it with group or channel.
-- `TG_SPLIT_SIZE`: Size of split in bytes. Default is `2GB`. Default is `4GB` if your account is premium.
-- `AS_DOCUMENT`: Default type of Telegram file upload. Default is `False` mean as media. `Bool`
-- `CUSTOM_FILENAME`: Add custom word to leeched file name.
-- `SHORTENER_API`: Fill your Shortener API key.
-- `SHORTENER`: Shortener URL.
-  - Supported URL Shorteners:
-  >exe.io gplinks.in shrinkme.io urlshortx.com shortzon.com
-- `CRYPT`: Cookie for gdtot google drive link generator.
-- `RECURSIVE_SEARCH`: T/F And Fill drive_folder File Using Driveid.py Script.
-- `LOGS_CHATS`:  Chat ids of channels/groups where you want to store Mirror logs, NOTE Add bot in Mirror logs channel/group as Admin.
-- `BOT_PM`:  Set to "True" if you want files to be sent to user PM
-
-  - `BUTTON_THREE_NAME`:
-  - `BUTTON_THREE_URL`:
-  - `BUTTON_FOUR_NAME`:
-  - `BUTTON_FOUR_URL`:
-  - `BUTTON_FIVE_NAME`:
-  - `BUTTON_FIVE_URL`:
-
-Note: You can limit maximum concurrent downloads by changing the value of
-MAX_CONCURRENT_DOWNLOADS in aria.sh.
-
-## Getting Google OAuth API credential file
-
-- Visit the
-  [Google Cloud Console](https://console.developers.google.com/apis/credentials)
-- Go to the OAuth Consent tab, fill it, and save.
-- Go to the Credentials tab and click Create Credentials -> OAuth Client ID
-- Choose Other and Create.
-- Use the download button to download your credentials.
-- Move that file to the root of mirror-bot, and rename it to credentials.json
-- Visit [Google API page](https://console.developers.google.com/apis/library)
-- Search for Drive and enable it if it is disabled
-- Finally, run the script to generate token file (token.pickle) for Google
-  Drive:
-
-```
-pip install google-api-python-client google-auth-httplib2
-google-auth-oauthlib python3 generate_drive_token.py 
+```bash
+sudo dockerd   # if not already running
+sudo docker build . -t mirror-bot
+sudo docker run mirror-bot
 ```
 
-## Gdtot Cookies
-To Clone or Leech gdtot link follow these steps:
-1. Login/Register to [gdtot](https://new.gdtot.top).
-2. Copy this script and paste it in browser address bar.
-   - **Note**: After pasting it check at the beginning of the script in broswer address bar if `javascript:` exists or not, if not so write it as shown below.
-   ```
-   javascript:(function () {
-     const input = document.createElement('input');
-     COOKIE = JSON.parse(JSON.stringify({cookie : document.cookie}));
-     input.value = COOKIE['cookie'].split('crypt=')[1];
-     document.body.appendChild(input);
-     input.focus();
-     input.select();
-     var result = document.execCommand('copy');
-     document.body.removeChild(input);
-     if(result)
-       alert('Crypt copied to clipboard');
-     else
-       prompt('Failed to copy Crypt. Manually copy below Crypt\n\n', input.value);
-   })();
-   ```
-   - After pressing enter your browser will prompt a alert.
-3. Now you'll get CRYPT in your clipboard
-   ```
-   NGxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxWdSVT0%3D
-   ```
-4. From this you have to paste value of CRYPT in config.env file.
+or locally:
 
-## Generate Database
-
-**1. Using ElephantSQL**
-- Go to https://elephantsql.com and create account (skip this if you already have **ElephantSQL** account)
-- Hit `Create New Instance`
-- Follow the further instructions in the screen
-- Hit `Select Region`
-- Hit `Review`
-- Hit `Create instance`
-- Select your database name
-- Copy your database url, and fill to `DATABASE_URL` in config
-
-**2. Using Heroku PostgreSQL**
-<p><a href="https://dev.to/prisma/how-to-setup-a-free-postgresql-database-on-heroku-1dc1"> <img src="https://img.shields.io/badge/See%20Dev.to-black?style=for-the-badge&logo=dev.to" width="160""/></a></p>
-
-## Using service accounts for uploading to avoid user rate limit
-
-For Service Account to work, you must set USE_SERVICE_ACCOUNTS="True" in config
-file or environment variables Many thanks to
-[AutoRClone](https://github.com/xyou365/AutoRclone) for the scripts **NOTE:**
-Using service accounts is only recommended while uploading to a team drive.
-
-## Generating service accounts
-
-Generate service accounts [What is service account](https://cloud.google.com/iam/docs/service-accounts)
-
-Let us create only the service accounts that we need. **Warning:** abuse of this
-feature is not the aim of this project and we do **NOT** recommend that you make
-a lot of projects, just one project and 100 sa allow you plenty of use, its also
-possible that over abuse might get your projects banned by google.
-
-Note: 1 service account can copy around 750gb a day, 1 project can make 100
-service accounts so that's 75tb a day, for most users this should easily
-suffice.
-
-```
-python3 gen_sa_accounts.py --quick-setup 1 --new-only
+```bash
+pip install -r requirements.txt
+python3 main.py   # auto-installs missing requirements, then starts the bot
 ```
 
-A folder named accounts will be created which will contain keys for the service
-accounts
-
-NOTE: If you have created SAs in past from this script, you can also just re
-download the keys by running:
+### 4. Set commands with @BotFather
 
 ```
-python3 gen_sa_accounts.py --download-keys project_id
-```
-
-### Add all the service accounts to the Team Drive
-
-- Run:
-
-```
-python3 add_to_team_drive.py -d SharedTeamDriveSrcID
-```
-
-## Youtube-dl authentication using .netrc file
-
-For using your premium accounts in youtube-dl, edit the netrc file (in the root
-directory of this repository) according to following format:
-
-```
-machine host login username password my_youtube_password
-```
-
-where host is the name of extractor (eg. youtube, twitch). Multiple accounts of
-different hosts can be added each separated by a new line.
-
-</details>
-
-## Commands to set via [@BotFather](https://t.me/BotFather)
-~~~
 mirror - Mirror
 zipmirror - Mirror and upload as zip
 unzipmirror - Mirror and extract files
@@ -325,28 +103,229 @@ log - Get the Bot Log{owner}
 restart - Restart the Bot{sudo}
 stats - Bot Usage Stats
 ping - Ping the Bot
+connect - Connect your Google Drive{authorized}
+disconnect - Disconnect your Google Drive{authorized}
 help - All cmds with description
-~~~
+```
 
-## Deploy on [GitHub actions](https://github.com/rahulkhatri137/mirrorbot-workflow)
-* [Deploy Video Tutorial](https://youtu.be/U9uxTKsfvaE)
+## Per-user Google Drive (OAuth) — how it works
 
+By default (without service accounts), **every authorized user uploads to their own Google Drive** instead of the owner's `GDRIVE_FOLDER_ID`.
 
-## Deploying on Heroku
-- Token Pickle URL is must for deploying on Heorku!
+Flow:
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://dashboard.heroku.com/new?button-url=https://github.com/rahulkhatri137/mirrorbot137-deployer&template=https://github.com/rahulkhatri137/mirrorbot137-deployer)
+1. The user sends `/connect` to the bot.
+2. The bot replies with a Google OAuth consent URL.
+3. The user authorizes in the browser; Google redirects to the bot's OAuth callback server.
+4. The bot saves the credentials as `user_creds/<user_id>.json` and confirms in Telegram.
+5. From then on, `/mirror`, `/clone`, etc. upload to that user's Drive. `/disconnect` removes the credentials.
 
+Details:
 
-- Deploying on Heroku with Github Workflow
-<p><a href="https://telegra.ph/Heroku-Deployment-10-04"> <img src="https://img.shields.io/badge/Deploy%20Guide-blueviolet?style=for-the-badge&logo=heroku" width="170""/></a></p>
+- Auth precedence: if `USE_SERVICE_ACCOUNTS=True`, service accounts are used as before. Otherwise each user's own OAuth credentials are used.
+- Credentials are stored per user, token expiry is handled automatically (offline refresh token).
+- `user_creds/*.json` is gitignored (`*.json`); never commit credential files.
+- Users who haven't run `/connect` yet get a clear "Use /connect first" error instead of silently uploading to someone else's Drive.
 
-## Credits :-
+### OAuth configuration
 
-- First of all, full credit goes to
-  [Shivam Jha aka lzzy12](https://github.com/lzzy12) and
-  [JaskaranSM aka Zero Cool](https://github.com/jaskaranSM) They build up this bot from scratch.
-- Then a huge thanks to Sreeraj V R [Repo](https://github.com/SVR666/LoaderX-Bot)
-- Features added from SlamBot [Repo](https://github.com/breakdowns/slam-mirrorbot) (Archived)
-- Thanks To Ken For Base [Repo](https://github.com/KenHV/Mirror-Bot)
-- Thanks to Harsh For Improvements [Repo](https://github.com/harshpreets63/Mirror-Bot)
+In the [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
+
+1. Create a project, enable the **Google Drive API**.
+2. **OAuth consent screen** → External → add your Google account as a test user (or publish the app).
+3. **Credentials** → Create Credentials → **OAuth client ID** → **Web application**.
+4. Add your callback URL as an authorized redirect URI:
+   - Local: `http://localhost:8080/oauth/callback`
+   - Cloudflare Tunnel: `https://<your-tunnel>.trycloudflare.com/oauth/callback` (or your fixed tunnel hostname)
+5. Copy the **Client ID** and **Client secret** into config:
+
+```
+GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-xxxx
+OAUTH_REDIRECT_URI=https://<your-host>/oauth/callback
+OAUTH_SERVER_PORT=8080
+```
+
+The callback endpoint is `GET /oauth/callback?code=...&state=<user_id>`, served by `oauth_server.py` on `OAUTH_SERVER_PORT`.
+
+### Exposing the OAuth server with Cloudflare Tunnel
+
+The OAuth callback server listens on `0.0.0.0:<OAUTH_SERVER_PORT>` (default `8080`). If your host has no public IP or you don't want to open ports, expose it with a Cloudflare Tunnel:
+
+**Quick tunnel (no account needed, URL changes on restart):**
+
+```bash
+cloudflared tunnel --url http://localhost:8080
+```
+
+Copy the `https://<random>.trycloudflare.com` URL it prints and set `OAUTH_REDIRECT_URI=https://<random>.trycloudflare.com/oauth/callback` **before** generating `/connect` links. Note: quick-tunnel URLs rotate each restart, so regenerate the config and ask users to reconnect if the tunnel restarts.
+
+**Named tunnel (fixed hostname, recommended):**
+
+```bash
+cloudflared tunnel login
+cloudflared tunnel create mirrorbot
+cloudflared tunnel route dns mirrorbot oauth.example.com
+cloudflared tunnel run mirrorbot --url http://localhost:8080
+```
+
+Then use `OAUTH_REDIRECT_URI=https://oauth.example.com/oauth/callback` and add `https://oauth.example.com/oauth/callback` as an authorized redirect URI in Google Cloud Console.
+
+> The tunnel only exposes the OAuth callback port — it does not expose the Telegram bot itself (Telegram connects to the bot via long polling).
+
+## Configuration reference
+
+### Required fields
+
+- `BOT_TOKEN`: Telegram bot token from [@BotFather](https://t.me/BotFather)
+- `TELEGRAM_API` / `TELEGRAM_HASH`: from https://my.telegram.org — authenticates the account used to download/upload Telegram files. `Int`
+- `OWNER_ID`: Telegram user ID of the bot owner. `Int`
+- `GDRIVE_FOLDER_ID`: Folder/TeamDrive ID where mirrors upload by default (used when service accounts are enabled or by the owner).
+- `DOWNLOAD_DIR`: Local path where downloads are stored.
+- `DOWNLOAD_STATUS_UPDATE_INTERVAL`: Seconds between progress updates (recommended ≥ `10`). `Int`
+- `AUTO_DELETE_MESSAGE_DURATION`: Seconds after which the bot deletes its messages; `-1` disables. `Int`
+
+### OAuth (per-user Drive) fields
+
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`: OAuth web client from Google Cloud Console.
+- `OAUTH_REDIRECT_URI`: Full callback URL, e.g. `http://localhost:8080/oauth/callback` or `https://<tunnel>/oauth/callback`.
+- `OAUTH_SERVER_PORT`: Port for the callback server. Default `8080`. `Int`
+
+### Optional fields
+
+- `UPSTREAM_REPO` / `UPSTREAM_BRANCH`: self-update source repo/branch on restart. For private repos use `https://username:{token}@github.com/...`. Default branch `master`.
+- `ACCOUNTS_ZIP_URL`: Direct link to a ZIP of service accounts to load externally.
+- `TOKEN_PICKLE_URL`: Direct link to load `token.pickle` externally (required for Heroku deploys).
+- `DATABASE_URL`: Postgres URL — stores auth/sudo users, per-user leech settings + thumbnails, RSS data, incomplete tasks. On Heroku, delete from `config.env` and let Heroku inject it.
+- `AUTHORIZED_CHATS`: user/chat ids (space-separated) allowed to use the bot.
+- `SUDO_USERS`: user ids with sudo permissions (space-separated).
+- `IS_TEAM_DRIVE`: `True` if uploading to a Team Drive. `Bool`
+- `USE_SERVICE_ACCOUNTS`: use service accounts instead of per-user OAuth. `Bool` — see [Service accounts](#using-service-accounts)
+- `INDEX_URL`: Bhadoo/GoIndex index URL for link previews.
+- `MEGA_KEY` / `MEGA_USERNAME` / `MEGA_PASSWORD`: Mega.nz API key / premium credentials.
+- `UPTOBOX_TOKEN`: token for uptobox mirrors.
+- `STOP_DUPLICATE_CLONE`: skip files already present in Drive (by filename). `Bool`
+- `CLONE_LIMIT`: max clone size in GB. `Int`
+- `VIEW_LINK`: use `?a=view` index links (Bhadoo-compatible). `Bool`
+- `IGNORE_PENDING_REQUESTS`: ignore pending requests after restart. `Bool`
+- `SESSION_STRING`: Pyrogram session string for downloading/uploading via your Telegram account (`python3 generate_string_session.py`). Note: with a session string the bot works in groups/channels, not PM.
+- `TG_SPLIT_SIZE`: split size in bytes for Telegram uploads; empty = max (2GB, 4GB for premium).
+- `AS_DOCUMENT`: upload Telegram files as documents instead of media. `Bool`
+- `CUSTOM_FILENAME`: prefix/suffix added to leeched filenames.
+- `SHORTENER` / `SHORTENER_API`: URL shortener + API key (exe.io, gplinks.in, shrinkme.io, urlshortx.com, shortzon.com).
+- `CRYPT`: gdtot cookie for gdtot link generation (see [Gdtot cookies](#gdtot-cookies)).
+- `RECURSIVE_SEARCH`: recursive multi-drive search using the `drive_folder` file.
+- `LOGS_CHATS`: chat ids where mirror logs are posted (bot must be admin).
+- `BOT_PM`: send files directly to user PM. `Bool`
+- `BUTTON_THREE_NAME/URL`, `BUTTON_FOUR_NAME/URL`, `BUTTON_FIVE_NAME/URL`: extra buttons under file posts.
+
+Concurrent download limit: edit `MAX_CONCURRENT_DOWNLOADS` in `aria.sh`.
+
+## Deployment
+
+### Docker
+
+```bash
+sudo dockerd
+sudo docker build . -t mirror-bot
+sudo docker run mirror-bot
+```
+
+### Heroku
+
+- `TOKEN_PICKLE_URL` is required for Heroku.
+- One-click: [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://dashboard.heroku.com/new?button-url=https://github.com/rahulkhatri137/mirrorbot137-deployer&template=https://github.com/rahulkhatri137/mirrorbot137-deployer)
+- GitHub Actions workflow (manual trigger): set `HEROKU_API_KEY`, `HEROKU_APP_NAME`, `HEROKU_EMAIL`, `CONFIG_FILE_URL` in repo secrets, then run **Deploy to Heroku** in Actions.
+
+### HiddenCloud / restricted hosts
+
+`main.py` auto-installs `requirements.txt` before starting the bot and adjusts `PYTHONPATH` for `.local` site-packages. A bundled `imghdr` shim covers Python 3.12/3.13 where the module was removed from the stdlib.
+
+## Multi search IDs
+
+To list from multiple team drives/folders, run `driveid.py` to generate `drive_folder`, or create it manually:
+
+```
+MyTdName tdID IndexLink(if available)
+MyTdName2 tdID IndexLink(if available)
+```
+
+Set `RECURSIVE_SEARCH=True`.
+
+## Getting Google OAuth API credentials
+
+- [Google Cloud Console](https://console.developers.google.com/apis/credentials) → OAuth Consent tab → fill and save.
+- Credentials tab → Create Credentials → OAuth Client ID → **Web application** (this fork uses the web OAuth flow for per-user uploads).
+- Enable the **Google Drive API**.
+- For the legacy owner token path: download `credentials.json` to the repo root, then run:
+
+```
+pip install google-api-python-client google-auth-httplib2
+python3 generate_drive_token.py
+```
+
+## Gdtot cookies
+
+1. Log in at [gdtot](https://new.gdtot.top).
+2. Run the bookmarklet below in the browser address bar (prepend `javascript:` if missing), copy the alert value, and paste it into `CRYPT` in `config.env`:
+
+```js
+javascript:(function () {
+  const input = document.createElement('input');
+  COOKIE = JSON.parse(JSON.stringify({cookie: document.cookie}));
+  input.value = COOKIE['cookie'].split('crypt=')[1];
+  document.body.appendChild(input);
+  input.focus();
+  input.select();
+  document.execCommand('copy');
+  document.body.removeChild(input);
+})();
+```
+
+## Generate database
+
+**ElephantSQL (free):**
+1. Create an account at https://elephantsql.com
+2. Create New Instance → Select Region → Review → Create instance
+3. Copy the URL into `DATABASE_URL`.
+
+**Heroku PostgreSQL:**
+<p><a href="https://dev.to/prisma/how-to-setup-a-free-postgresql-database-on-heroku-1dc1"><img src="https://img.shields.io/badge/See%20Dev.to-black?style=for-the-badge&logo=dev.to" width="160""/></a></p>
+
+## Using service accounts
+
+Set `USE_SERVICE_ACCOUNTS=True` — recommended when uploading to a team drive, or when you prefer the classic single-owner mode. Scripts thanks to [AutoRclone](https://github.com/xyou365/AutoRclone). 1 service account can copy ~750 GB/day; 1 project can hold 100 accounts (~75 TB/day). Don't abuse it.
+
+```bash
+python3 gen_sa_accounts.py --quick-setup 1 --new-only
+# re-download existing keys:
+python3 gen_sa_accounts.py --download-keys project_id
+```
+
+### Add service accounts to a team drive
+
+```bash
+python3 add_to_team_drive.py -d SharedTeamDriveSrcID
+```
+
+## Youtube-dl authentication
+
+Edit the `.netrc` file in the repo root:
+
+```
+machine host login username password my_youtube_password
+```
+
+One line per extractor host (youtube, twitch, ...).
+
+## Credits
+
+- **Per-user Google Drive OAuth** — OAuth server and per-user credential flow adapted from [telegram-drive-bot](https://github.com/telegram-drive-bot) (per-user Google Drive OAuth system), rewritten for python-telegram-bot v13 and this codebase.
+- **Base bot** — [Shivam Jha (lzzy12)](https://github.com/lzzy12) and [JaskaranSM (Zero Cool)](https://github.com/jaskaranSM) built the original [python-aria-mirror-bot](https://github.com/lzzy12/python-aria-mirror-bot) from scratch.
+- **Fork** — [MirrorBot137](https://github.com/rahulkhatri137/mirrorbot137) collected and merged features from many community forks; this repository builds on it.
+- [Sreeraj V R](https://github.com/SVR666/LoaderX-Bot), [SlamBot](https://github.com/breakdowns/slam-mirrorbot), [Ken](https://github.com/KenHV/Mirror-Bot), [Harsh](https://github.com/harshpreets63/Mirror-Bot) for features and improvements.
+- [AutoRclone](https://github.com/xyou365/AutoRclone) for the service-account scripts.
+
+## License
+
+GPL-3.0 — see [LICENSE](LICENSE).
